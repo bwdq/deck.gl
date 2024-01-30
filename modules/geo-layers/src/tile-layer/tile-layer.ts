@@ -32,6 +32,8 @@ const defaultProps: DefaultProps<TileLayerProps> = {
   // TODO - change to onViewportLoad to align with Tile3DLayer
   onViewportLoad: {type: 'function', optional: true, value: null},
   onTileLoad: {type: 'function', value: tile => {}},
+  //added
+  onTileLoading: {type: 'function', value: tile => {}},
   onTileUnload: {type: 'function', value: tile => {}},
   // eslint-disable-next-line
   onTileError: {type: 'function', value: err => console.error(err)},
@@ -78,6 +80,9 @@ type _TileLayerProps<DataT> = {
 
   /** Called when a tile successfully loads. */
   onTileLoad?: (tile: Tile2DHeader<DataT>) => void;
+
+  /** Called when a tile starts loading. */
+  onTileLoading?: (tile: Tile2DHeader<DataT>) => void;
 
   /** Called when a tile is cleared from cache. */
   onTileUnload?: (tile: Tile2DHeader<DataT>) => void;
@@ -238,6 +243,7 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
       getTileData: this.getTileData.bind(this),
       onTileLoad: this._onTileLoad.bind(this),
+      onTileLoading: this.props.onTileLoading.bind(this),
       onTileError: this._onTileError.bind(this),
       onTileUnload: this._onTileUnload.bind(this)
     };
@@ -276,6 +282,13 @@ export default class TileLayer<DataT = any, ExtraPropsT extends {} = {}> extends
 
   _onTileLoad(tile: Tile2DHeader<DataT>): void {
     this.props.onTileLoad(tile);
+    tile.layers = null;
+
+    this.setNeedsUpdate();
+  }
+
+  _onTileLoading(tile: Tile2DHeader<DataT>): void {
+    this.props.onTileLoading(tile);
     tile.layers = null;
 
     this.setNeedsUpdate();

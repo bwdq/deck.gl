@@ -78,6 +78,8 @@ export type Tileset2DProps<DataT = any> = {
 
   /** Called when a tile successfully loads. */
   onTileLoad?: (tile: Tile2DHeader<DataT>) => void;
+  /** Called when a tile starts loading. */
+  onTileLoading?: (tile: Tile2DHeader<DataT>) => void;
   /** Called when a tile is cleared from cache. */
   onTileUnload?: (tile: Tile2DHeader<DataT>) => void;
   /** Called when a tile failed to load. */
@@ -133,6 +135,7 @@ export class Tileset2D {
   private _minZoom?: number;
 
   private onTileLoad: (tile: Tile2DHeader) => void;
+  private onTileLoading: (tile: Tile2DHeader) => void;
 
   /**
    * Takes in a function that returns tile data, a cache size, and a max and a min zoom level.
@@ -143,6 +146,14 @@ export class Tileset2D {
 
     this.onTileLoad = tile => {
       this.opts.onTileLoad?.(tile);
+      if (this.opts.maxCacheByteSize) {
+        this._cacheByteSize += tile.byteLength;
+        this._resizeCache();
+      }
+    };
+
+    this.onTileLoading = tile => {
+      this.opts.onTileLoading?.(tile);
       if (this.opts.maxCacheByteSize) {
         this._cacheByteSize += tile.byteLength;
         this._resizeCache();
